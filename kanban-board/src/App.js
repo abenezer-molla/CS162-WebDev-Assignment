@@ -6,11 +6,11 @@ import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 import Task from './Task';
 import uuid from 'react-uuid';
 
-//import db from './firebase'; 
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
-
-
-
+import db from './firebase'; 
 
 
 const onDragEnd = (result, columns, setColumns) => {
@@ -18,6 +18,7 @@ const onDragEnd = (result, columns, setColumns) => {
   if(!result.destination) return;
 
   const {source, destination} = result; 
+
 
   if (source.droppableId !== destination.droppableId){
 
@@ -67,20 +68,43 @@ const onDragEnd = (result, columns, setColumns) => {
 }
 
 function App() {
-  const [input, setInput] = useState(''); 
 
-  const [typedTasks, settypedTasks] = useState([ {id: uuid(), text : 'This is Task 1'}]);
- 
-  
+  const [input, setInput] = useState(''); 
+  const [typedTasks, settypedTasks] = useState([{id:uuid(), text: ''}]);
+
+    
   const sendTask = (event) => {
     event.preventDefault(); 
-    settypedTasks([...typedTasks, {id: uuid(), text: input}]);
+
+    db.collection('Tasks').add({
+      text: input, 
+      id: uuid(), 
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
     setInput('');
   }
+
+  useEffect(() => {
+
+    db.collection('Tasks')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(snapshot => {
+      settypedTasks(snapshot.docs.map(doc =>doc.data()))
+
+    });
+
+  }, [])
+
+
+
+
+ 
 
   console.log(typedTasks)
 
   console.log("Hello")
+
+
   const MajorTaskColumns = 
   {
     [uuid()]: {
@@ -155,6 +179,8 @@ function App() {
 
                       return(
 
+                      
+
                         <Draggable key  = {task.id} draggableId = {task.id} index = {index}>
                           {(provided, snapshot) => {
 
@@ -172,13 +198,19 @@ function App() {
                                 backgroundColor:  snapshot.isDragging ? 'yellow' : 'red',
                                 ...provided.draggableProps.style
                               }}
-
-
-                              
                               >
 
-                                <Task id = {task.id} text = {task.text}/>
                                 
+
+                                {
+
+                                typedTasks.map(eachTask => (
+
+                                  <Task id = {eachTask.id} text = {eachTask.text}/>
+
+
+                                ))
+                          }
 
                               </div>
 
