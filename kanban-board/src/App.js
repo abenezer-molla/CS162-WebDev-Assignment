@@ -1,45 +1,17 @@
 import React, {useState, useEffect} from 'react';
+import {Button, FormControl, InputLabel, Input} from '@material-ui/core';
 
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 
+import Task from './Task';
 import uuid from 'react-uuid';
 
 //import db from './firebase'; 
 
-const listOfInputTasks = [
-
-  {id: uuid(), content: 'Task 1'}, 
-  {id: uuid(), content: 'Task 2'}, 
-  {id: uuid(), content: 'Task 3'}, 
-  {id: uuid(), content: 'Task 4'}
-];
 
 
 
 
-const MajorTaskColumns = 
-  {
-    [uuid()]: {
-      name: 'TODOs', 
-      tasks: listOfInputTasks
-
-    }, 
-
-    [uuid()]: {
-      name: 'IN Progress', 
-      tasks: []
-    }, 
-
-    [uuid()]:{
-      name: 'To Verify', 
-      tasks: []
-    }, 
-
-    [uuid()]: {
-      name: 'Done', 
-      tasks: []
-    }
-  };
 
 const onDragEnd = (result, columns, setColumns) => {
 
@@ -92,16 +64,69 @@ const onDragEnd = (result, columns, setColumns) => {
 
   }
 
-
-
-
 }
 
 function App() {
+  const [input, setInput] = useState(''); 
+
+  const [typedTasks, settypedTasks] = useState([ {id: uuid(), text : 'This is Task 1'}]);
+ 
+  
+  const sendTask = (event) => {
+    event.preventDefault(); 
+    settypedTasks([...typedTasks, {id: uuid(), text: input}]);
+    setInput('');
+  }
+
+  console.log(typedTasks)
+
+  console.log("Hello")
+  const MajorTaskColumns = 
+  {
+    [uuid()]: {
+      name: 'TODOs', 
+      tasks: typedTasks
+
+    }, 
+
+    [uuid()]: {
+      name: 'IN PROGRESS', 
+      tasks: []
+    }, 
+
+    [uuid()]:{
+      name: 'TO VERIFY', 
+      tasks: []
+    }, 
+
+    [uuid()]: {
+      name: 'DONE', 
+      tasks: []
+    }
+  };
+
+
   const [columns, setColumns]  = useState (MajorTaskColumns);
 
   return (
+
+    <div> 
+
+    <div style =  {{alignItems:'center', justifyContent: 'space-between', marginLeft: 70, marginRight: 70, backgroundColor: 'lightgray'}}>
+      <form style = {{display: 'flex', alignItems: 'center'}}>
+
+        <FormControl style = {{display: 'flex'}}>
+          <InputLabel>Enter a ToDo Task</InputLabel>
+          <Input  value = {input} onChange  = {event => setInput(event.target.value)} />
+          <Button disabled = {!input } variant='contained' color = 'primary' type = 'submit' onClick={sendTask}>Send Task</Button>
+
+        </FormControl>
+      </form>
+
+    </div>
+
     <div style = {{ display: 'flex', justifyContent:'center', height: '100%'}}>
+
       
       <DragDropContext onDragEnd = {result => onDragEnd(result, columns, setColumns)}>
       
@@ -126,6 +151,8 @@ function App() {
                   >
                     {column.tasks.map((task, index) => {
 
+                      
+
                       return(
 
                         <Draggable key  = {task.id} draggableId = {task.id} index = {index}>
@@ -149,10 +176,9 @@ function App() {
 
                               
                               >
+
+                                <Task id = {task.id} text = {task.text}/>
                                 
-
-                                {task.content}
-
 
                               </div>
 
@@ -175,15 +201,13 @@ function App() {
               </Droppable>
               </div>
               </div>
-
-
-
           )
 
             })}
 
-
       </DragDropContext>
+
+    </div>
 
     </div>
   );
