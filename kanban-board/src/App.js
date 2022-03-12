@@ -8,7 +8,7 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import db from './firebase'; 
 
-const onDragEnd = (result, columns, updateColumn) => {
+const onDragEnd = (result, columns, typedTasks, updateColumn) => {
 
   if(!result.destination) return;
 
@@ -19,13 +19,19 @@ const onDragEnd = (result, columns, updateColumn) => {
     const startingColumn = columns[source.droppableId];
     const destinationColumn = columns[destination.droppableId];
 
-    const startingTasks = [...startingColumn.tasks];
-    console.log("startingColumn", startingColumn)
-    console.log("startingTasks,m", startingTasks)
-    const destinationTasks  = [...destinationColumn.tasks];
 
-    const removed = startingTasks.splice(source.index, 1);
-    console.log("removed", removed)
+    
+
+
+    const startingTasks = [...startingColumn.tasks];
+    
+
+    const destinationTasks  = [...destinationColumn.tasks];
+    
+
+
+    const [removed] = startingTasks.splice(source.index, 1);
+    
     destinationTasks.splice(destination.index, 0, removed);
     console.log("destinationTasks" , destinationTasks)
     
@@ -44,7 +50,8 @@ const onDragEnd = (result, columns, updateColumn) => {
   } else{
 
     const column = columns[source.droppableId]; 
-    const copyOfItems  = [...column.tasks]
+
+    const copyOfItems  = [...typedTasks]
   
     const[removed] = copyOfItems.splice(source.index, 1); 
     copyOfItems.splice(destination.index, 0, removed); 
@@ -67,10 +74,11 @@ function App() {
   
 
   const [input, setInput] = useState(''); 
-  const [typedTasks, settypedTasks] = useState([{ }]);
+  const [typedTasks, settypedTasks] = useState([{id: uuid(), text: "Place Holder"}]);
   
 
-    
+
+
   const sendTask = (event) => {
     event.preventDefault(); 
 
@@ -91,12 +99,8 @@ function App() {
 
     });
 
-  }, [input])
+  }, [])
 
-
-  console.log("typedTask", typedTasks)
-
-  console.log("Hello")
 
   
 
@@ -127,9 +131,9 @@ function App() {
 
   const [columns, updateColumn]  = useState(MajorTaskColumns);
 
+  console.log("BIG DEAL", columns);
 
 
-  
   return (
 
     <div> 
@@ -149,14 +153,16 @@ function App() {
 
     <div style = {{ display: 'flex', justifyContent:'center', height: '100%'}}>
 
-      
-      <DragDropContext onDragEnd = {result => onDragEnd(result, columns, updateColumn)}>
+      <DragDropContext onDragEnd = {result => onDragEnd(result, columns, typedTasks, updateColumn)}>
       
         {Object.entries(columns).map(([id, column]) => {
+         
           return (
             <div style = {{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
             <h2>{column.name}</h2>
             <div style = {{margin: 8}}>
+            
+
             <Droppable droppableId = {id}>
               {(provided, snapshot) => {
                 return(
@@ -171,21 +177,14 @@ function App() {
                     minHeight: 400
                   }}
                   >
-                    {column.tasks.map((task, index) => {
+                    {column.tasks.map((eachTask, index) => {
 
-                      {console.log(index, "index")}
-
-                      
-
+ 
                       return(
-                        
-
-                        
-
-                        typedTasks.map(eachTask => (
 
                         <Draggable key  = {eachTask.id} draggableId = {eachTask.id} index = {index}>
                           {(provided, snapshot) => {
+                            
 
                             return (
 
@@ -205,12 +204,10 @@ function App() {
                               }}
                               >
 
-
                                   <Task id = {eachTask.id} text = {eachTask.text}/>
 
 
                               </div>
-                              
 
 
                             )
@@ -219,10 +216,12 @@ function App() {
 
                         </Draggable>
 
-                      ))
+                      
                         
                       
                       );
+
+                      
                     })}
                     {provided.placeholder}
                     
