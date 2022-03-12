@@ -1,24 +1,18 @@
 import React, {useState, useEffect} from 'react';
 import {Button, FormControl, InputLabel, Input} from '@material-ui/core';
-
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
-
 import Task from './Task';
 import uuid from 'react-uuid';
-
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-
 import db from './firebase'; 
 
-
-const onDragEnd = (result, columns, setColumns) => {
+const onDragEnd = (result, columns, updateColumn) => {
 
   if(!result.destination) return;
 
   const {source, destination} = result; 
-
 
   if (source.droppableId !== destination.droppableId){
 
@@ -26,13 +20,16 @@ const onDragEnd = (result, columns, setColumns) => {
     const destinationColumn = columns[destination.droppableId];
 
     const startingTasks = [...startingColumn.tasks];
+    console.log("startingColumn", startingColumn)
+    console.log("startingTasks,m", startingTasks)
     const destinationTasks  = [...destinationColumn.tasks];
 
-    const[removed] = startingTasks.splice(source.index, 1);
-
+    const removed = startingTasks.splice(source.index, 1);
+    console.log("removed", removed)
     destinationTasks.splice(destination.index, 0, removed);
+    console.log("destinationTasks" , destinationTasks)
     
-    setColumns({
+    updateColumn({
       ...columns, 
       [source.droppableId]: {
         ...startingColumn, 
@@ -44,8 +41,6 @@ const onDragEnd = (result, columns, setColumns) => {
       }
     })
 
-
-
   } else{
 
     const column = columns[source.droppableId]; 
@@ -53,7 +48,7 @@ const onDragEnd = (result, columns, setColumns) => {
   
     const[removed] = copyOfItems.splice(source.index, 1); 
     copyOfItems.splice(destination.index, 0, removed); 
-    setColumns ({
+    updateColumn ({
       ...columns, 
       [source.droppableId]: {
         ...column, 
@@ -62,15 +57,18 @@ const onDragEnd = (result, columns, setColumns) => {
       }
     })
 
-
   }
 
 }
 
+
 function App() {
 
+  
+
   const [input, setInput] = useState(''); 
-  const [typedTasks, settypedTasks] = useState([{id:uuid(), text: ''}]);
+  const [typedTasks, settypedTasks] = useState([{ }]);
+  
 
     
   const sendTask = (event) => {
@@ -93,16 +91,14 @@ function App() {
 
     });
 
-  }, [])
+  }, [input])
 
 
-
-
- 
-
-  console.log(typedTasks)
+  console.log("typedTask", typedTasks)
 
   console.log("Hello")
+
+  
 
 
   const MajorTaskColumns = 
@@ -129,9 +125,11 @@ function App() {
     }
   };
 
+  const [columns, updateColumn]  = useState(MajorTaskColumns);
 
-  const [columns, setColumns]  = useState (MajorTaskColumns);
 
+
+  
   return (
 
     <div> 
@@ -152,7 +150,7 @@ function App() {
     <div style = {{ display: 'flex', justifyContent:'center', height: '100%'}}>
 
       
-      <DragDropContext onDragEnd = {result => onDragEnd(result, columns, setColumns)}>
+      <DragDropContext onDragEnd = {result => onDragEnd(result, columns, updateColumn)}>
       
         {Object.entries(columns).map(([id, column]) => {
           return (
@@ -175,16 +173,23 @@ function App() {
                   >
                     {column.tasks.map((task, index) => {
 
+                      {console.log(index, "index")}
+
                       
 
                       return(
+                        
 
-                      
+                        
 
-                        <Draggable key  = {task.id} draggableId = {task.id} index = {index}>
+                        typedTasks.map(eachTask => (
+
+                        <Draggable key  = {eachTask.id} draggableId = {eachTask.id} index = {index}>
                           {(provided, snapshot) => {
 
                             return (
+
+                              
                               <div 
                               ref = {provided.innerRef}
                               {...provided.draggableProps}
@@ -200,19 +205,12 @@ function App() {
                               }}
                               >
 
-                                
-
-                                {
-
-                                typedTasks.map(eachTask => (
 
                                   <Task id = {eachTask.id} text = {eachTask.text}/>
 
 
-                                ))
-                          }
-
                               </div>
+                              
 
 
                             )
@@ -220,6 +218,9 @@ function App() {
 
 
                         </Draggable>
+
+                      ))
+                        
                       
                       );
                     })}
