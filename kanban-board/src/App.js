@@ -19,10 +19,6 @@ const onDragEnd = (result, columns, typedTasks, updateColumn) => {
     const startingColumn = columns[source.droppableId];
     const destinationColumn = columns[destination.droppableId];
 
-
-    
-
-
     const startingTasks = [...startingColumn.tasks];
     
 
@@ -47,9 +43,10 @@ const onDragEnd = (result, columns, typedTasks, updateColumn) => {
       }
     })
 
-  } else{
+  } else if ((source.droppableId === destination.droppableId) && (columns[source.droppableId].name === "TODOs")){
 
     const column = columns[source.droppableId]; 
+    
 
     const copyOfItems  = [...typedTasks]
   
@@ -71,13 +68,9 @@ const onDragEnd = (result, columns, typedTasks, updateColumn) => {
 
 function App() {
 
-  
 
   const [input, setInput] = useState(''); 
-  const [typedTasks, settypedTasks] = useState([{id: uuid(), text: "After Entering a ToDo, Drag Down and Release to Refresh Data"}]);
-  
-
-
+  const [typedTasks, settypedTasks] = useState([{id: uuid(), text: "After you Finish Entering a ToDo, Drag Down and Release Once to fetch back from Backend"}]);
 
   const sendTask = (event) => {
     event.preventDefault(); 
