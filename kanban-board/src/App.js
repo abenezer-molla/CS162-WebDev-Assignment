@@ -74,7 +74,7 @@ function App() {
   
 
   const [input, setInput] = useState(''); 
-  const [typedTasks, settypedTasks] = useState([{id: uuid(), text: "Place Holder"}]);
+  const [typedTasks, settypedTasks] = useState([{id: uuid(), text: "After Entering a ToDo, Drag Down and Release to Refresh Data"}]);
   
 
 
